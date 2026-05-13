@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSSB – Mutuelle de Santé</title>
+<meta name="description" content="Rwanda Social Security Board – Mutuelle de Santé Management System">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="images/rssb-logo.png" alt="RSSB Logo" onerror="this.style.display='none'">
+      <h1>RSSB Mutuelle de Santé</h1>
+      <p>Rwanda Social Security Board – Health Insurance</p>
+    </div>
+
+    <!-- ---- LOGIN PANEL ---- -->
+    <div id="loginPanel">
+      <div class="login-tabs">
+        <button class="login-tab active" id="tabAdmin" onclick="switchLoginTab('admin')"><i class="fas fa-shield-alt"></i> Admin</button>
+        <button class="login-tab" id="tabStaff" onclick="switchLoginTab('staff')"><i class="fas fa-hospital"></i> Hospital Staff</button>
+        <button class="login-tab" id="tabMember" onclick="switchLoginTab('member')"><i class="fas fa-user"></i> Member</button>
+      </div>
+      <form id="loginForm" onsubmit="doLogin(event)" autocomplete="on">
+        <div class="form-group">
+          <label id="loginEmailLabel">Email Address</label>
+          <div class="input-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="text" id="loginEmail" name="email" placeholder="Enter your email" required autocomplete="username">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+        </div>
+        <div id="loginError" class="hidden" style="background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:.875rem;margin-bottom:14px;"></div>
+        <button type="submit" class="btn btn-yellow btn-block"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+      <!-- Only show register link on Member tab -->
+      <div id="memberRegisterLink" class="hidden" style="text-align:center;margin-top:16px">
+        <p style="color:#64748b;font-size:.875rem">New member? <button onclick="showRegisterPanel()" style="background:none;border:none;color:#003087;font-weight:700;cursor:pointer;font-size:.875rem;text-decoration:underline">Register here</button></p>
+      </div>
+    </div>
+
+    <!-- ---- MEMBER SELF-REGISTRATION PANEL ---- -->
+    <div id="registerPanel" class="hidden">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <button onclick="showLoginPanel()" style="background:none;border:none;cursor:pointer;color:#003087;font-size:1.1rem"><i class="fas fa-arrow-left"></i></button>
+        <h2 style="color:#003087;font-size:1.2rem;font-weight:800;margin:0">Create Member Account</h2>
+      </div>
+
+      <form id="selfRegisterForm" onsubmit="selfRegisterMember(event)">
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label>Your Photo *</label>
+          <div class="photo-upload-box" id="regPhotoBox">
+            <input type="file" id="regPhotoFile" accept="image/*" onchange="previewRegPhoto(this)">
+            <img id="regPhotoPreview" class="photo-preview hidden" src="" alt="Preview">
+            <div id="regPhotoDefault">
+              <i class="fas fa-camera" style="font-size:2rem;color:#94a3b8;margin-bottom:6px"></i>
+              <p style="color:#64748b;font-size:.8rem;margin:0">Click to upload your photo</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>First Name *</label><input type="text" id="srFirstName" required placeholder="First name"></div>
+          <div class="form-group"><label>Last Name *</label><input type="text" id="srLastName" required placeholder="Last name"></div>
+        </div>
+        <div class="form-group">
+          <label>National ID *</label>
+          <input type="text" id="srNationalId" required pattern="1[0-9]{15}" placeholder="1XXXXXXXXXXXXXXX">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group"><label>Date of Birth *</label><input type="date" id="srDOB" required></div>
+          <div class="form-group"><label>Phone Number *</label><input type="text" id="srPhone" required pattern="(078|079|072|073)[0-9]{7}" placeholder="078XXXXXXX"></div>
+        </div>
+        <div class="form-group"><label>Email Address *</label><input type="email" id="srEmail" required placeholder="you@example.com"></div>
+        <div class="form-group">
+          <label>Marital Status *</label>
+          <select id="srMaritalStatus" required>
+            <option value="">Select status</option>
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+            <option value="divorced">Divorced / Separated</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ubudehe Category * <small style="color:#64748b;font-weight:400">(2026/2027)</small></label>
+          <select id="srCategory" required>
+            <option value="">Select category</option>
+            <option value="CATEGORY_1">Category I – No Income (Free, Gov. 100%)</option>
+            <option value="CATEGORY_2">Category II – &lt;30,000 RWF/mo (4,000 RWF/yr, 1,000 subsidized)</option>
+            <option value="CATEGORY_3">Category III – 30,000–60,000 RWF/mo (5,000 RWF/yr)</option>
+            <option value="CATEGORY_4">Category IV – 60,000–120,000 RWF/mo (8,000 RWF/yr)</option>
+            <option value="CATEGORY_5">Category V – &gt;120,000 RWF/mo (20,000 RWF/yr)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Password *</label><input type="password" id="srPassword" name="new-password" required placeholder="Min. 6 characters" minlength="6" autocomplete="new-password"></div>
+        <div class="form-group"><label>Confirm Password *</label><input type="password" id="srConfirm" name="confirm-password" required placeholder="Repeat password" autocomplete="new-password"></div>
+
+        <div id="regError" class="hidden" style="background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:.875rem;margin-bottom:14px;"></div>
+        <button type="submit" class="btn btn-yellow btn-block"><i class="fas fa-user-plus"></i> Create Account</button>
+        <p style="text-align:center;margin-top:12px;font-size:.8rem;color:#64748b">Already registered? <button type="button" onclick="showLoginPanel()" style="background:none;border:none;color:#003087;font-weight:700;cursor:pointer;font-size:.8rem;text-decoration:underline">Sign In</button></p>
+      </form>
+    </div>
+
+    <p style="text-align:center;margin-top:20px;font-size:.75rem;color:#94a3b8;">&copy; 2024 Rwanda Social Security Board</p>
+  </div>
+</div>
+
+<!-- ===== APP SHELL ===== -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="images/rssb-logo.png" alt="RSSB" onerror="this.style.display='none'">
+      <span>Mutuelle de Santé</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarAvatar">A</div>
+      <div class="user-info">
+        <strong id="sidebarName">Admin</strong>
+        <small id="sidebarRole">Administrator</small>
+      </div>
+    </div>
+    <span class="nav-label">Navigation</span>
+    <nav id="sidebarNav"></nav>
+    <div class="sidebar-bottom">
+      <button class="nav-item" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ======= ADMIN SECTIONS ======= -->
+
+    <!-- Dashboard -->
+    <section id="sec-dashboard" class="content-section">
+      <div class="topbar">
+        <h1><i class="fas fa-th-large"></i> Dashboard</h1>
+        <span style="font-size:.875rem;color:#64748b" id="dashDate"></span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Members</div></div></div>
+        <div class="stat-card green"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div><div class="stat-num" id="statActive">0</div><div class="stat-label">Active Coverage</div></div></div>
+        <div class="stat-card yellow"><div class="stat-icon"><i class="fas fa-clock"></i></div><div><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending Payment</div></div></div>
+        <div class="stat-card red"><div class="stat-icon"><i class="fas fa-times-circle"></i></div><div><div class="stat-num" id="statExpired">0</div><div class="stat-label">Expired</div></div></div>
+      </div>
+
+      <!-- Quick Payments on Dashboard -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-title"><i class="fas fa-money-bill-wave"></i> Record Payment</div>
+        <form onsubmit="recordPaymentDash(event)">
+          <div class="form-row">
+            <div class="form-group"><label>Member ID *</label><input type="text" id="dashPayId" required placeholder="e.g. MBR-001"></div>
+            <div class="form-group"><label>Amount (RWF) *</label><input type="number" id="dashPayAmount" required min="1" placeholder="Amount"></div>
+            <div class="form-group">
+              <label>Payment Method *</label>
+              <select id="dashPayMethod" required>
+                <option value="">Select method</option>
+                <option value="Cash">Cash</option>
+                <option value="Mobile Money">Mobile Money (MTN/Airtel)</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Card">Card Payment</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-yellow"><i class="fas fa-check"></i> Record Payment</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> Recent Members</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Photo</th><th>Name</th><th>National ID</th><th>Category</th><th>Status</th></tr></thead>
+            <tbody id="recentMembersBody"><tr><td colspan="5" style="text-align:center;color:#64748b">No members yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Members -->
+    <section id="sec-members" class="content-section">
+      <div class="topbar">
+        <h1><i class="fas fa-users"></i> Member Management</h1>
+        <button class="btn btn-yellow" onclick="openRegisterForm()"><i class="fas fa-user-plus"></i> Register New Member</button>
+      </div>
+
+      <div class="card hidden" id="registerFormCard">
+        <div class="card-title"><i class="fas fa-user-plus"></i> Register New Member</div>
+        <form onsubmit="adminRegisterMember(event)">
+          <div class="form-group" style="margin-bottom:20px">
+            <label>Member Photo *</label>
+            <div class="photo-upload-box" id="photoUploadBox">
+              <input type="file" id="memberPhoto" accept="image/*" onchange="previewPhoto(this)">
+              <img id="photoPreviewImg" class="photo-preview hidden" src="" alt="Preview">
+              <div id="photoUploadDefault">
+                <i class="fas fa-camera" style="font-size:2rem;color:#94a3b8;margin-bottom:8px"></i>
+                <p style="color:#64748b;font-size:.875rem">Click to upload photo</p>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>First Name *</label><input type="text" id="regFirstName" required placeholder="First name"></div>
+            <div class="form-group"><label>Last Name *</label><input type="text" id="regLastName" required placeholder="Last name"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>National ID *</label><input type="text" id="regNationalId" required pattern="1[0-9]{15}" placeholder="1XXXXXXXXXXXXXXX"></div>
+            <div class="form-group"><label>Date of Birth *</label><input type="date" id="regDOB" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone Number *</label><input type="text" id="regPhone" required pattern="(078|079|072|073)[0-9]{7}" placeholder="078XXXXXXX"></div>
+            <div class="form-group"><label>Email Address *</label><input type="email" id="regEmail" required placeholder="member@example.com"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Marital Status *</label>
+              <select id="regMaritalStatus" required>
+                <option value="">Select status</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced / Separated</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Password *</label><input type="password" id="regPassword" required placeholder="Set member password" minlength="6"></div>
+            <div class="form-group">
+              <label>Ubudehe Category * <small style="color:#64748b;font-weight:400">(2026/2027)</small></label>
+              <select id="regCategory" required>
+                <option value="">Select category</option>
+                <option value="CATEGORY_1">Category I – No Income (Free)</option>
+                <option value="CATEGORY_2">Category II – 4,000 RWF/yr (1,000 subsidized)</option>
+                <option value="CATEGORY_3">Category III – 5,000 RWF/yr</option>
+                <option value="CATEGORY_4">Category IV – 8,000 RWF/yr</option>
+                <option value="CATEGORY_5">Category V – 20,000 RWF/yr</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-yellow"><i class="fas fa-save"></i> Register Member</button>
+            <button type="button" class="btn btn-outline" onclick="closeRegisterForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-header">
+          <div class="card-title" style="margin:0"><i class="fas fa-list"></i> All Members</div>
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search members..." onkeyup="filterMembers(this.value)" id="memberSearch">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Photo</th><th>Member ID</th><th>Name</th><th>National ID</th><th>Phone</th><th>Email</th><th>Category</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="membersTableBody"><tr><td colspan="9" style="text-align:center;color:#64748b">No members yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payments -->
+    <section id="sec-payments" class="content-section">
+      <div class="topbar"><h1><i class="fas fa-money-bill-wave"></i> Payment Management</h1></div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-plus-circle"></i> Record New Payment</div>
+        <form onsubmit="recordPayment(event)">
+          <div class="form-row">
+            <div class="form-group"><label>Member ID *</label><input type="text" id="payMemberId" required placeholder="e.g. MBR-001"></div>
+            <div class="form-group"><label>Amount (RWF) *</label><input type="number" id="payAmount" required min="1" placeholder="Amount"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Payment Method *</label>
+              <select id="payMethod" required>
+                <option value="">Select method</option>
+                <option value="Cash">Cash</option>
+                <option value="Mobile Money">Mobile Money (MTN/Airtel)</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Card">Card Payment</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Coverage Year *</label><input type="number" id="payYear" required placeholder="2024" min="2020" max="2030"></div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-yellow"><i class="fas fa-check"></i> Record Payment</button>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-history"></i> All Payments</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Receipt No</th><th>Member ID</th><th>Member Name</th><th>Amount</th><th>Method</th><th>Year</th><th>Date</th></tr></thead>
+            <tbody id="paymentsTableBody"><tr><td colspan="7" style="text-align:center;color:#64748b">No payments yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Users -->
+    <section id="sec-users" class="content-section">
+      <div class="topbar">
+        <h1><i class="fas fa-users-cog"></i> User Management</h1>
+        <button class="btn btn-yellow" onclick="openAddUserModal()"><i class="fas fa-user-plus"></i> Add User</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-shield-alt"></i> Admins &amp; Hospital Staff</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Hospital / Unit</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= HOSPITAL STAFF ======= -->
+    <section id="sec-verify" class="content-section">
+      <div class="topbar"><h1><i class="fas fa-id-card-alt"></i> Member Verification</h1></div>
+      <div class="card" style="max-width:580px;margin:0 auto 24px">
+        <div class="card-title"><i class="fas fa-search"></i> Search Member</div>
+        <div style="display:flex;gap:12px">
+          <input type="text" id="verifySearch" placeholder="Enter National ID or Full Name..." style="flex:1;padding:12px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;font-family:Inter,sans-serif" onkeyup="if(event.key==='Enter')searchForVerify()">
+          <button class="btn btn-yellow" onclick="searchForVerify()"><i class="fas fa-search"></i> Search</button>
+        </div>
+      </div>
+      <div id="verifyResult"></div>
+    </section>
+
+    <!-- ======= MEMBER SECTIONS ======= -->
+
+    <!-- Member Dashboard -->
+    <section id="sec-member-dashboard" class="content-section">
+      <div class="topbar"><h1><i class="fas fa-th-large"></i> My Dashboard</h1></div>
+
+      <!-- Profile + Status Row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px" id="memberTopCards">
+        <!-- Profile Card -->
+        <div class="card" style="margin:0">
+          <div style="display:flex;align-items:center;gap:20px">
+            <div id="mDashPhotoWrap">
+              <div style="width:80px;height:80px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#94a3b8"><i class="fas fa-user"></i></div>
+            </div>
+            <div>
+              <h2 style="color:#003087;font-size:1.3rem;font-weight:800" id="mDashName">Member</h2>
+              <p style="color:#64748b;font-size:.875rem" id="mDashId">–</p>
+              <p style="color:#64748b;font-size:.875rem" id="mDashEmail">–</p>
+            </div>
+          </div>
+        </div>
+        <!-- Insurance Status Card -->
+        <div class="card" style="margin:0;text-align:center">
+          <div style="font-size:2.5rem;margin-bottom:8px" id="mDashStatusIcon">⏳</div>
+          <div id="mDashStatus"></div>
+          <p style="color:#64748b;font-size:.875rem;margin-top:6px">Insurance Coverage</p>
+          <p style="color:#003087;font-weight:600;margin-top:4px" id="mDashCategory">–</p>
+        </div>
+      </div>
+
+      <!-- Make a Payment -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-money-bill-wave"></i> Make a Payment</div>
+        <form onsubmit="memberPay(event)" id="memberPayForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Amount (RWF) *</label>
+              <input type="number" id="mPayAmount" required min="1" placeholder="Enter amount">
+              <small id="mPayHint" style="color:#64748b;margin-top:4px;display:block"></small>
+            </div>
+            <div class="form-group">
+              <label>Payment Method *</label>
+              <select id="mPayMethod" required>
+                <option value="">Select method</option>
+                <option value="Cash">Cash</option>
+                <option value="Mobile Money">Mobile Money (MTN / Airtel)</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Card">Card Payment</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Coverage Year *</label>
+              <input type="number" id="mPayYear" required min="2020" max="2035" placeholder="2024">
+            </div>
+          </div>
+          <!-- Dependent payment info banner -->
+          <div id="mPayForDepInfo" class="hidden" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+            <img id="mPayForDepPhoto" src="" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #93c5fd;flex-shrink:0;display:none">
+            <div id="mPayForDepAvatar" style="width:52px;height:52px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-child" style="color:#1d4ed8;font-size:1.3rem"></i></div>
+            <span style="color:#1e40af;font-size:.875rem">Paying for dependent: <strong id="mPayForDepName"></strong></span>
+            <button type="button" onclick="clearDependentPayment()" style="margin-left:auto;background:none;border:none;color:#64748b;cursor:pointer;font-size:.8rem"><i class="fas fa-times"></i> Clear</button>
+          </div>
+          <input type="hidden" id="mPayForDependent" value="">
+          <!-- Receipt Confirmation -->
+          <div id="mPayReceipt" class="hidden" style="background:#d1fae5;border-radius:8px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+            <i class="fas fa-check-circle" style="color:#065f46;font-size:1.5rem"></i>
+            <div>
+              <p style="font-weight:700;color:#065f46;margin:0">Payment Successful!</p>
+              <p id="mPayReceiptText" style="color:#065f46;margin:4px 0 0;font-size:.875rem"></p>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-yellow"><i class="fas fa-paper-plane"></i> Submit Payment</button>
+        </form>
+      </div>
+
+      <!-- My Payments on Dashboard -->
+      <div class="card">
+        <div class="card-title"><i class="fas fa-receipt"></i> My Payment History</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Receipt No</th><th>Amount</th><th>Payment Method</th><th>Coverage Year</th><th>Date</th></tr></thead>
+            <tbody id="myPaymentsBody"><tr><td colspan="5" style="text-align:center;color:#64748b">No payments recorded yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Single-member notice (shown only for singles) -->
+      <div id="singleNotice" class="hidden" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <i class="fas fa-info-circle" style="font-size:1.6rem;color:#1d4ed8;flex-shrink:0"></i>
+        <div>
+          <p style="font-weight:700;color:#1e40af;margin:0 0 4px">Single Member Plan</p>
+          <p style="color:#3b82f6;font-size:.875rem;margin:0">As a single member your insurance covers only you. If your situation changes (marriage, etc.) please contact an admin to update your profile and unlock family coverage.</p>
+        </div>
+      </div>
+
+      <!-- My Family / Dependents -->
+      <div class="card hidden" id="familyCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="card-title" style="margin:0"><i class="fas fa-users"></i> My Family / Dependents</div>
+          <button class="btn btn-yellow" onclick="openAddDependentModal()"><i class="fas fa-user-plus"></i> Add Child</button>
+        </div>
+        <p style="color:#64748b;font-size:.875rem;margin-bottom:14px">Children under 18 are covered under your family plan. Add them here and pay their annual insurance contribution on their behalf.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Photo</th><th>Name</th><th>Relationship</th><th>Date of Birth</th><th>National ID</th><th>Category</th><th>Insurance</th><th>Actions</th></tr></thead>
+            <tbody id="dependentsTableBody"><tr><td colspan="8" style="text-align:center;color:#64748b">No dependents added yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Member Profile -->
+    <section id="sec-myprofile" class="content-section">
+      <div class="topbar"><h1><i class="fas fa-user-circle"></i> My Profile</h1></div>
+      <div class="card" style="max-width:580px;margin:0 auto">
+        <div style="text-align:center;margin-bottom:28px">
+          <div id="myProfilePhotoWrap">
+            <div style="width:120px;height:120px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:2.5rem;color:#64748b"><i class="fas fa-user"></i></div>
+          </div>
+          <h2 style="color:#003087;margin-top:14px;font-size:1.4rem;font-weight:800" id="myProfileName">–</h2>
+          <div id="myProfileStatus" style="margin-top:6px"></div>
+        </div>
+        <table style="width:100%;border-collapse:collapse"><tbody id="myProfileBody"></tbody></table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== MEMBER DETAIL MODAL ===== -->
+<div id="memberDetailModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="closeMemberModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-user-circle"></i> Member Details</div>
+    <div id="memberDetailContent"></div>
+  </div>
+</div>
+
+<!-- ===== ADD USER MODAL ===== -->
+<div id="addUserModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddUserModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-user-plus"></i> Add System User</div>
+    <form onsubmit="addUser(event)">
+      <div class="form-row">
+        <div class="form-group"><label>First Name *</label><input type="text" id="userFirstName" required></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="userLastName" required></div>
+      </div>
+      <div class="form-group"><label>Email Address *</label><input type="email" id="userEmail" required></div>
+      <div class="form-group"><label>Password *</label><input type="password" id="userPassword" required minlength="6"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Role *</label>
+          <select id="userRole" required onchange="toggleHospitalField()">
+            <option value="">Select role</option>
+            <option value="admin">Admin</option>
+            <option value="staff">Hospital Insurance Staff</option>
+          </select>
+        </div>
+        <div class="form-group" id="hospitalFieldWrap">
+          <label>Hospital / Unit</label>
+          <input type="text" id="userHospital" placeholder="e.g. CHUK, Kibagabaga">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-yellow"><i class="fas fa-save"></i> Add User</button>
+        <button type="button" class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== ADD DEPENDENT MODAL ===== -->
+<div id="addDependentModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddDependentModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-child"></i> Add Dependent Child</div>
+    <p style="color:#64748b;font-size:.875rem;margin-bottom:16px">Add a child under 18 to your family plan. Their insurance will be managed and paid through your account.</p>
+    <form id="addDependentForm" onsubmit="addDependent(event)">
+      <!-- Child Photo -->
+      <div class="form-group">
+        <label>Child's Photo *</label>
+        <div class="photo-upload-box" id="depPhotoBox">
+          <input type="file" id="depPhotoFile" accept="image/*" onchange="previewDepPhoto(this)">
+          <img id="depPhotoPreview" class="photo-preview hidden" src="" alt="Preview">
+          <div id="depPhotoDefault">
+            <i class="fas fa-camera" style="font-size:2rem;color:#94a3b8;margin-bottom:6px"></i>
+            <p style="color:#64748b;font-size:.8rem;margin:0">Click to upload child's photo</p>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>First Name *</label><input type="text" id="depFirstName" required placeholder="First name"></div>
+        <div class="form-group"><label>Last Name *</label><input type="text" id="depLastName" required placeholder="Last name"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date of Birth *</label><input type="date" id="depDOB" required></div>
+        <div class="form-group">
+          <label>Relationship *</label>
+          <select id="depRelationship" required>
+            <option value="">Select</option>
+            <option value="Son">Son</option>
+            <option value="Daughter">Daughter</option>
+            <option value="Other">Other dependent</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>National ID <small style="color:#94a3b8">(optional – if already issued)</small></label><input type="text" id="depNationalId" placeholder="Leave blank if not yet issued"></div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-yellow"><i class="fas fa-save"></i> Add Dependent</button>
+        <button type="button" class="btn btn-outline" onclick="closeAddDependentModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

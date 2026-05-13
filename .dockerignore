@@ -1,0 +1,29 @@
+# Maven build output (rebuilt inside Docker)
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.eclipse
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git metadata
+.git/
+.gitignore
+.github/
+
+# Logs
+*.log
+
+# Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs
+README.md
+docs/

@@ -1,0 +1,48 @@
+# ============================================================
+# MutualCare Insurance System — .gitignore
+# ============================================================
+
+# ── Maven build output ───────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ── IDE — IntelliJ IDEA ──────────────────────────────────────
+.idea/
+*.iml
+*.iws
+out/
+.idea_modules/
+
+# ── IDE — VS Code ────────────────────────────────────────────
+.vscode/
+*.code-workspace
+
+# ── IDE — Eclipse ────────────────────────────────────────────
+.classpath
+.project
+.settings/
+bin/
+
+# ── OS files ─────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+spring.log
+
+# ── Environment / Secrets ────────────────────────────────────
+.env
+.env.local
+application-prod.properties
+**/secrets/
+
+# ── Docker (keep Dockerfile & compose, ignore generated) ─────
+docker-data/
+docker-volumes/
